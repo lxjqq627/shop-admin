@@ -28,6 +28,7 @@ const store = createStore({
           .catch((err) => reject(err));
       });
     },
+    
     // 获取当前登录用户信息
     getinfo({ commit }) {
       return new Promise((resolve, reject) => {
