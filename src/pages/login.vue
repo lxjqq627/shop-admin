@@ -50,11 +50,13 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted, onBeforeUnmount } from "vue";
 import { toast } from "~/composables/utils";
 import { useRouter } from "vue-router";
-import { login, getinfo } from "~/api/manager";
+import { useStore } from "vuex";
 import { setToken } from "~/composables/auth";
+
+const store = useStore();
 const router = useRouter();
 
 // do not use same name with ref
@@ -88,23 +90,10 @@ const onSubmit = () => {
       return false;
     }
     loading.value = true;
-
-    login(form.username, form.password)
+    store
+      .dispatch("login", form)
       .then((res) => {
-        console.log(res);
-
-        // 提示成功
-        toast("登录成功");
-
-        // 存储token
-        setToken(res.token);
-
-        // 获取用户相关信息
-        getinfo().then((res2) => {
-          console.log(res2);
-        });
-
-        // 跳转到后台首页
+        toast("登陆成功");
         router.push("/");
       })
       .finally(() => {
@@ -112,6 +101,22 @@ const onSubmit = () => {
       });
   });
 };
+
+// 监听回车事件的方法
+function onKeyUp(e) {
+  console.log(e)
+  if(e.key === 'Enter') onSubmit()
+}
+
+onMounted(() => {
+  // 添加键盘监听
+  document.addEventListener("keyup", onKeyUp);
+});
+
+onBeforeUnmount(() => {
+  // 添加键盘监听
+  document.removeEventListener("keyup", onKeyUp);
+});
 </script>
 
 <style scoped>

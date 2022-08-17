@@ -1,26 +1,30 @@
 <template>
   <div>
     后台首页
-    <el-button @click="set">设置</el-button>
-    <el-button @click="get">读取</el-button>
-    <el-button @click="remove">删除</el-button>
+    {{ $store.state.user.username }}
+
+    <el-button @click="handleLogout">退出登录</el-button>
   </div>
 </template>
 <script setup>
-import { useCookies } from "@vueuse/integrations/useCookies";
-const cookie = useCookies();
+import { logout } from '~/api/manager'
+import { showModal, toast } from '~/composables/utils'
+import { useRouter} from 'vue-router'
+import { useStore } from 'vuex'
 
-console.log(cookie);
+const router = useRouter()
+const store = useStore()
 
-function set() {
-  cookie.set("admin-token", "1232456");
+function handleLogout() {
+  showModal('是否要退出登录').then(res => {
+    logout().finally(() => {
+      store.dispatch('logout')
+      // 跳转到登录页面
+      router.push('/login')
+      // 提示退出登录成功
+      toast('退出登录成功')
+    })
+  })
 }
 
-function get() {
-  console.log(cookie.get("admin-token"));
-}
-
-function remove() {
-  cookie.remove("admin-token");
-}
 </script>
