@@ -28,11 +28,15 @@ router.beforeEach(async (to, from, next) => {
     await store.dispatch("getinfo");
   }
 
+  // 设置页面标题
+  let title = to.meta.title || "-商城后台-";
+  document.title = title;
+
   next();
 });
 
 // 全局后置守卫
 router.afterEach((to, from) => {
   // to and from are both route objects.
-  hideFullLoading()
-})
+  hideFullLoading();
+});
