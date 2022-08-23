@@ -1,0 +1,3 @@
+<template>
+  FMenu
+</template>
