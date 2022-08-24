@@ -44,10 +44,13 @@
       </el-dropdown>
     </div>
   </div>
+  <form-drawer ref="formDrawerRef">
+    123
+    <div class="bg-rose-400" style="height: 1000px"></div>
+  </form-drawer>
+
+
 </template>
-
-<script setup></script>
-
 <style>
 .f-header {
   @apply flex items-center bg-indigo-700 text-light-50 fixed top-0 left-0 right-0;
@@ -74,12 +77,69 @@
 </style>
 
 <script setup>
-import { logout } from "~/api/manager";
+import { ref, reactive } from "vue";
+import FormDrawer from '~/components/FormDrawer.vue'
+import { logout, updatepassword } from "~/api/manager";
 import { showModal, toast } from "~/composables/utils";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { useFullscreen } from "@vueuse/core";
 
+const form = reactive({
+  oldpassword: "",
+  password: "",
+  repassword: "",
+});
+
+const rules = {
+  oldpassword: [
+    {
+      required: true,
+      message: "旧密码不能为空",
+      trigger: "blur",
+    },
+  ],
+  password: [
+    {
+      required: true,
+      message: "新密码不能为空",
+      trigger: "blur",
+    },
+  ],
+  repassword: [
+    {
+      required: true,
+      message: "确认密码不能为空",
+      trigger: "blur",
+    },
+  ],
+};
+
+const formRef = ref(null);
+const loading = ref(false);
+const onSubmit = () => {
+  formRef.value.validate((valid) => {
+    if (!valid) {
+      return false;
+    }
+
+    loading.value = true;
+    updatepassword(form)
+    .then(res => {
+      toast('修改密码成功,请重新登录')
+      store.dispatch("logout");
+      // 跳转到登录页面
+      router.push("/login");
+    })
+    .finally(() => {
+      loading.value = false;
+    })
+  });
+};
+
+// 修改密码部分
+const formDrawerRef = ref(null)
+const showDrawer = ref(false);
 const { isFullscreen, toggle } = useFullscreen();
 const router = useRouter();
 const store = useStore();
@@ -87,7 +147,7 @@ const store = useStore();
 const handleCommand = (c) => {
   switch (c) {
     case "rePassword":
-      console.log("修改密码");
+      formDrawerRef.value.open();
       break;
     case "logout":
       handleLogout();
