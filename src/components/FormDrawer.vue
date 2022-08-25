@@ -1,58 +1,20 @@
 <template>
   <!-- 抽屉组件 -->
   <el-drawer
-    size="45%"
+    :size="size"
     v-model="showDrawer"
-    title="修改密码"
+    :title="title"
     :close-on-click-modal="false"
+    :destroy-on-close="destroyOnClose"
   >
     <div class="formDrawer">
       <div class="body">
         <slot></slot>
       </div>
       <div class="actions">
-        <el-button color="#626aef" type="primary">提交</el-button>
+        <el-button color="#626aef" type="primary" @click="submit" :loading="loading">{{ confirmText }}</el-button>
         <el-button color="#626aef" type="default" @click="close">取消</el-button>
       </div>
-      <!-- <el-form
-        ref="formRef"
-        :rules="rules"
-        :model="form"
-        label-width="80px"
-        size="small"
-      >
-        <el-form-item prop="oldpassword" label="旧密码">
-          <el-input v-model="form.oldpassword" placeholder="请输入旧密码">
-          </el-input>
-        </el-form-item>
-        <el-form-item prop="password" label="新密码">
-          <el-input
-            type="password"
-            v-model="form.password"
-            placeholder="请输入密码"
-            show-password
-          >
-          </el-input>
-        </el-form-item>
-        <el-form-item prop="repassword" label="确认密码">
-          <el-input
-            type="password"
-            v-model="form.repassword"
-            placeholder="请输入确认密码"
-            show-password
-          >
-          </el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            color="#626aef"
-            type="primary"
-            @click="onSubmit"
-            :loading="loading"
-            >提交</el-button
-          >
-        </el-form-item>
-      </el-form> -->
     </div>
   </el-drawer>
 </template>
@@ -60,6 +22,30 @@
 <script setup>
 import { ref } from "vue";
 const showDrawer = ref(false);
+
+const props = defineProps({
+  title: String,
+  size: {
+    type: String,
+    default: '45%'
+  },
+  destroyOnClose: {
+    type: Boolean,
+    default: false
+  },
+  confirmText: {
+    type: String,
+    default: '提交'
+  }
+})
+
+const loading = ref(false);
+const showLoading = () => {
+  loading.value = true;
+}
+const hideLoading = () => {
+  loading.value = false;
+}
 
 const open = () => {
   showDrawer.value = true;
@@ -69,10 +55,18 @@ const close = () => {
   showDrawer.value = false;
 };
 
+const emit = defineEmits(['submit'])
+// 提交
+const submit = () => {
+  emit('submit')
+}
+
 // 向父组件暴露以下方法
 defineExpose({
   open,
   close,
+  showLoading,
+  hideLoading
 });
 </script>
 
