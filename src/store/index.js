@@ -7,6 +7,9 @@ const store = createStore({
     return {
       // 用户信息
       user: {},
+
+      // 侧边宽度 默认展开
+      asideWidth: '250px',
     };
   },
   mutations: {
@@ -14,6 +17,10 @@ const store = createStore({
     SET_USERINFO(state, user) {
       state.user = user;
     },
+    // 展开收起侧边
+    handleAsideWidth(state) {
+      state.asideWidth = state.asideWidth === '250px' ? '64px' : '250px'
+    }
   },
   actions: {
     // 登录

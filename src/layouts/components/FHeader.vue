@@ -4,7 +4,10 @@
       <el-icon class="mr-1"><eleme-filled /></el-icon>
       统一系统VueApi测试
     </span>
-    <el-icon class="icon-btn"><fold /></el-icon>
+    <el-icon class="icon-btn" @click="$store.commit('handleAsideWidth')">
+      <fold v-if="$store.state.asideWidth === '250px' " />
+      <Expand v-else />
+    </el-icon>
     <el-tooltip
       class="box-item"
       effect="dark"

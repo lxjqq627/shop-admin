@@ -1,11 +1,15 @@
 <template>
-  <div class="f-menu">
+  <div class="f-menu" :style="{ width: $store.state.asideWidth }">
     <el-menu
+      :default-active="defaultActive"
+      unique-opened
+      :collapse="isCollapse"
       default-active="2"
       class="border-0"
       @open="handleOpen"
       @close="handleClose"
       @select="handleSelect"
+      :collapse-transition="false"
     >
       <template v-for="(item, index) in asideMenus" :key="index">
         <el-sub-menu
@@ -22,7 +26,7 @@
             v-for="(item2, index2) in item.child"
             :key="index2"
             :index="item2.frontpath"
-            >
+          >
             <el-icon>
               <component :is="item2.icon"></component>
             </el-icon>
@@ -40,8 +44,21 @@
   </div>
 </template>
 <script setup>
-import { useRouter } from 'vue-router'
+import { computed, ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useStore } from "vuex";
+
 const router = useRouter();
+const route = useRoute();
+const store = useStore();
+
+// 默认选中
+const defaultActive = ref(route.path)
+
+// 是否折叠
+const isCollapse = computed(() => {
+  return !(store.state.asideWidth === "250px");
+});
 
 const asideMenus = [
   {
@@ -69,16 +86,20 @@ const asideMenus = [
 ];
 
 const handleSelect = (e) => {
-  router.push(e)
-}
+  router.push(e);
+};
 </script>
 
 <style scoped>
+
 .f-menu {
-  width: 250px;
+  transition: all .2s;
   top: 64px;
   bottom: 0;
   left: 0;
-  overflow: auto @apply shadow-md fixed bg-light-50;
+  overflow-y: auto;
+  overflow-x: hidden;
+  @apply shadow-md fixed bg-light-50;
 }
+
 </style>
