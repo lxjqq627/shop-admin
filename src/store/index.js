@@ -10,6 +10,8 @@ const store = createStore({
 
       // 侧边宽度 默认展开
       asideWidth: '250px',
+      menus: [],
+      ruleNames: [],
     };
   },
   mutations: {
@@ -20,6 +22,15 @@ const store = createStore({
     // 展开收起侧边
     handleAsideWidth(state) {
       state.asideWidth = state.asideWidth === '250px' ? '64px' : '250px'
+    },
+
+    // 左侧菜单数据
+    SET_MENUS(state, menus) {
+      state.menus = menus;
+    },
+    // 左侧菜单权限
+    SET_RULENAMES(state, ruleNames) {
+      state.ruleNames = ruleNames;
     }
   },
   actions: {
@@ -42,6 +53,8 @@ const store = createStore({
         getinfo()
           .then((res) => {
             commit("SET_USERINFO", res);
+            commit("SET_MENUS",res.menus)
+            commit("SET_RULENAMES",res.ruleNames)
             resolve(res);
           })
           .catch((err) => reject(err));

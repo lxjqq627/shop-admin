@@ -1,9 +1,10 @@
-import router from "~/router";
+import { router, addRoutes } from "~/router";
 import { getToken } from "~/composables/auth";
 import { toast, showFullLoading, hideFullLoading } from "~/composables/utils";
 import store from "./store";
 
 // 全局路由守卫
+let hasGetInfo = false; // 防止重复加载信息接口
 router.beforeEach(async (to, from, next) => {
   // 显示loading
   showFullLoading();
@@ -23,16 +24,21 @@ router.beforeEach(async (to, from, next) => {
     return next({ path: from.path || "/" });
   }
 
+  let hasNewRoutes = false;
   // 如果用户登录 自动获取用户信息 存在vuex中
-  if (token) {
-    await store.dispatch("getinfo");
+  if (token && !hasGetInfo) {
+    let { menus } = await store.dispatch("getinfo");
+    hasGetInfo = true;
+    // 动态添加路由
+    hasNewRoutes = addRoutes(menus);
   }
 
   // 设置页面标题
   let title = to.meta.title || "-商城后台-";
   document.title = title;
 
-  next();
+  // 如果有新的路由那么走新的路由 解决新添加路由刷新404问题
+  hasNewRoutes ? next(to.fullPath) : next();
 });
 
 // 全局后置守卫
