@@ -21,4 +21,7 @@ import "./permission";
 
 import "nprogress/nprogress.css";
 
+import permission from '~/directives/permission.js' // 注册指令
+app.use(permission)
+
 app.mount("#app");
