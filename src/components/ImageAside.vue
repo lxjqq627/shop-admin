@@ -6,6 +6,8 @@
         v-for="(item, index) in list"
         :key="index"
         @edit="handleEdit(item)"
+        @delete="handleDelete(item.id)"
+        @click="handleChangeActiveId(item.id)"
         >{{ item.name }}</aside-list
       >
     </div>
@@ -48,6 +50,7 @@ import {
   getImageClassList,
   createImageClass,
   updateImageClass,
+  deleteImageClass,
 } from "~/api/image_class.js";
 import AsideList from "./AsideList.vue";
 import { toast } from "~/composables/utils.js";
@@ -55,7 +58,7 @@ import { toast } from "~/composables/utils.js";
 // 加载动画
 const loading = ref(false);
 const list = ref([]);
-const activeId = ref(0);
+
 
 // 分页部分
 const currentPage = ref(1);
@@ -75,7 +78,7 @@ function getData(p = null) {
       total.value = res.totalCount;
       let item = list.value[0];
       if (item) {
-        activeId.value = item.id;
+        handleChangeActiveId(item.id)
       }
     })
     .finally(() => {
@@ -143,6 +146,26 @@ const handleEdit = (row) => {
   form.order = row.order;
   formDrawerRef.value.open();
 };
+
+// 删除
+const handleDelete = (id) => {
+  loading.value = true;
+  deleteImageClass(id).then(res => {
+    toast('删除成功');
+    getData()
+  }).finally(() => {
+    loading.value = false;
+  })
+}
+
+// 选中图库分类ID
+const activeId = ref(0);
+const emit = defineEmits(['change'])
+// 切换分类的方法
+function handleChangeActiveId(id) {
+  activeId.value = id;
+  emit('change', id)
+}
 
 defineExpose({
   handleCreate,

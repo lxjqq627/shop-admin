@@ -10,15 +10,29 @@
     >
       <el-icon :size="12"><Edit /></el-icon>
     </el-button>
-    <el-button
-      text
-      class="px-1"
-      type="primary"
-      size="small"
-      @click="$emit('delete')"
+    <el-popconfirm
+      title="是否要删除该分类"
+      confirmButtonText="确认"
+      cancelButtonText="取消"
+      confirmButtonType="primary"
+      cancelButtonType="text"
+      icon="el-icon-question"
+      iconColor="#f90"
+      hideIcon="false"
+      @confirm="$emit('delete')"
     >
-      <el-icon :size="12"><Close /></el-icon>
-    </el-button>
+      <template #reference>
+        <el-button
+          text
+          class="px-1"
+          type="primary"
+          size="small"
+          @click=""
+        >
+          <el-icon :size="12"><Close /></el-icon> 
+        </el-button>
+      </template>
+    </el-popconfirm>
   </div>
 </template>
 <script setup>
