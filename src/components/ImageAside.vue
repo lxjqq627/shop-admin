@@ -1,15 +1,152 @@
 <template>
-  <el-aside width="220px" class="image-aside">
+  <el-aside width="220px" class="image-aside" v-loading="loading">
     <div class="top">
-      <aside-list active>分类标题</aside-list>
-
-      <aside-list>分类标题</aside-list>
+      <aside-list
+        :active="activeId === item.id"
+        v-for="(item, index) in list"
+        :key="index"
+        @edit="handleEdit(item)"
+        >{{ item.name }}</aside-list
+      >
     </div>
-    <div class="bottom">分页区域</div>
+    <div class="bottom">
+      <el-pagination
+        background
+        layout="prev, next"
+        :total="total"
+        :current-page="currentPage"
+        :page-size="limit"
+        @current-change="getData"
+      />
+    </div>
   </el-aside>
+  <form-drawer :title="drawerTitle" ref="formDrawerRef" @submit="handleSubmit">
+    <el-form
+      :model="form"
+      ref="formRef"
+      :rules="rules"
+      label-width="80px"
+      :inline="false"
+    >
+      <el-form-item label="分类名称" prop="name">
+        <el-input v-model="form.name"></el-input>
+      </el-form-item>
+      <el-form-item label="排序" prop="order">
+        <el-input-number
+          v-model="form.order"
+          :min="1"
+          :max="1000"
+        ></el-input-number>
+      </el-form-item>
+    </el-form>
+  </form-drawer>
 </template>
 <script setup>
+import { ref, reactive, computed } from "vue";
+import FormDrawer from "./FormDrawer.vue";
+import {
+  getImageClassList,
+  createImageClass,
+  updateImageClass,
+} from "~/api/image_class.js";
 import AsideList from "./AsideList.vue";
+import { toast } from "~/composables/utils.js";
+
+// 加载动画
+const loading = ref(false);
+const list = ref([]);
+const activeId = ref(0);
+
+// 分页部分
+const currentPage = ref(1);
+const total = ref(0);
+const limit = ref(10);
+
+// 获取数据的方法
+function getData(p = null) {
+  if (typeof p === "number") {
+    currentPage.value = p;
+  }
+
+  loading.value = true;
+  getImageClassList(currentPage.value)
+    .then((res) => {
+      list.value = res.list;
+      total.value = res.totalCount;
+      let item = list.value[0];
+      if (item) {
+        activeId.value = item.id;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+getData();
+
+const editId = ref(0);
+const drawerTitle = computed(() => {
+  return editId.value ? "修改" : "新增";
+});
+
+const formDrawerRef = ref(null);
+
+const form = reactive({
+  name: "",
+  order: 50,
+});
+
+const rules = {
+  name: [
+    {
+      required: true,
+      message: "图库分类名称不能为空",
+      trigger: "blur",
+    },
+  ],
+};
+
+const formRef = ref(null);
+const handleSubmit = () => {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    formDrawerRef.value.showLoading();
+
+    // 通过editId判断 调用 新增还是修改的接口
+    const fun = editId.value
+      ? updateImageClass(editId.value, form)
+      : createImageClass(form);
+    fun
+      .then((res) => {
+        toast(`${drawerTitle.value}成功`);
+        getData(editId.value ? currentPage.value : 1); // 通过editId判断新增还是修改调用各自的页码
+        formDrawerRef.value.close();
+      })
+      .finally(() => {
+        formDrawerRef.value.hideLoading();
+      });
+  });
+};
+
+// 新增
+const handleCreate = () => {
+  editId.value = 0;
+  form.name = "";
+  form.order = 50;
+  formDrawerRef.value.open();
+};
+
+// 编辑的方法
+const handleEdit = (row) => {
+  editId.value = row.id;
+  form.name = row.name;
+  form.order = row.order;
+  formDrawerRef.value.open();
+};
+
+defineExpose({
+  handleCreate,
+});
 </script>
 <style>
 .image-aside {
