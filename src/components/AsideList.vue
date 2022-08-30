@@ -1,12 +1,13 @@
 <template>
   <div class="aside-list" :class="{ active: active }">
     <span class="truncate"><slot /></span>
+    <!-- @click.stop 防止触发切换选中的冒泡事件 -->
     <el-button
       class="ml-auto px-1"
       text
       type="primary"
       size="small"
-      @click="$emit('edit')"
+      @click.stop="$emit('edit')"
     >
       <el-icon :size="12"><Edit /></el-icon>
     </el-button>
@@ -22,14 +23,8 @@
       @confirm="$emit('delete')"
     >
       <template #reference>
-        <el-button
-          text
-          class="px-1"
-          type="primary"
-          size="small"
-          @click=""
-        >
-          <el-icon :size="12"><Close /></el-icon> 
+        <el-button text class="px-1" type="primary" size="small" @click="">
+          <el-icon :size="12"><Close /></el-icon>
         </el-button>
       </template>
     </el-popconfirm>
