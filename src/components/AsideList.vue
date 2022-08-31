@@ -11,7 +11,10 @@
     >
       <el-icon :size="12"><Edit /></el-icon>
     </el-button>
-    <el-popconfirm
+
+    <!-- 删除按钮会触发父级冒泡选择事件 此处.stop不生效 外层包一层span 在span上注册回调停止事件 -->
+    <span @click.stop="() => {}">
+      <el-popconfirm
       title="是否要删除该分类"
       confirmButtonText="确认"
       cancelButtonText="取消"
@@ -28,6 +31,8 @@
         </el-button>
       </template>
     </el-popconfirm>
+    </span>
+
   </div>
 </template>
 <script setup>
