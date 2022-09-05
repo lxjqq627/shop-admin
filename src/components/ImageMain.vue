@@ -12,6 +12,7 @@
             shadow="hover"
             class="relative mb-3"
             :body-style="{ padding: 0 }"
+            :class="{ 'border-blue-500': item.checked }"
           >
             <el-image
               :src="item.url"
@@ -23,6 +24,15 @@
             ></el-image>
             <div class="image-title">{{ item.name }}</div>
             <div class="flex items-center justify-center p-2">
+              <el-checkbox
+                v-if="openChoose"
+                v-model="item.checked"
+                label=""
+                :indeterminate="false"
+                @change="handleChooseChange(item)"
+                >{{}}</el-checkbox
+              >
+
               <el-button
                 type="primary"
                 size="small"
@@ -43,7 +53,12 @@
                 @confirm="handleDelete(item.id)"
               >
                 <template #reference>
-                  <el-button type="primary" size="small" text @click=""
+                  <el-button
+                    class="!m-0"
+                    type="primary"
+                    size="small"
+                    text
+                    @click=""
                     >删除</el-button
                   >
                 </template>
@@ -64,27 +79,25 @@
       />
     </div>
   </el-main>
-  <el-drawer
-    title="上传图片"
-    v-model="drawer"
-    direction="rtl"
-    size="30%"
-  >
-    <upload-file :data="{ image_class_id}" @success="handleUploadSuccess"></upload-file>
+  <el-drawer title="上传图片" v-model="drawer" direction="rtl" size="30%">
+    <upload-file
+      :data="{ image_class_id }"
+      @success="handleUploadSuccess"
+    ></upload-file>
   </el-drawer>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { getImageList, updateImage, deleteImage } from "~/api/image.js";
 import { showPrompt, toast } from "~/composables/utils.js";
-import UploadFile from './UploadFile.vue'
+import UploadFile from "./UploadFile.vue";
 
 // 上传图片
 const drawer = ref(false);
 const openUploadFile = () => {
   drawer.value = true;
-}
+};
 
 // 分页部分
 const currentPage = ref(1);
@@ -103,7 +116,10 @@ function getData(p = null) {
   loading.value = true;
   getImageList(image_class_id.value, currentPage.value)
     .then((res) => {
-      list.value = res.list;
+      list.value = res.list.map((o) => {
+        o.checked = false;
+        return o;
+      });
       total.value = res.totalCount;
     })
     .finally(() => {
@@ -149,11 +165,32 @@ const handleDelete = (id) => {
 // 上传成功
 const handleUploadSuccess = () => {
   getData(1);
-}
+};
+
+defineProps({
+  openChoose: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(["choose"]);
+// 选中的图片
+const checkedImage = computed(() => {
+  return list.value.filter((o) => o.checked);
+});
+
+const handleChooseChange = (item) => {
+  if (item.checked && checkedImage.value.length > 1) {
+    item.checked = false;
+    return toast("最多只能选中一张", "error");
+  }
+  emit("choose", checkedImage.value);
+};
 
 defineExpose({
   loadData,
-  openUploadFile
+  openUploadFile,
 });
 </script>
 
