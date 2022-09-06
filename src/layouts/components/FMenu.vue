@@ -45,7 +45,7 @@
 </template>
 <script setup>
 import { computed, ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteUpdate } from "vue-router";
 import { useStore } from "vuex";
 
 const router = useRouter();
@@ -53,7 +53,12 @@ const route = useRoute();
 const store = useStore();
 
 // 默认选中
-const defaultActive = ref(route.path)
+const defaultActive = ref(route.path);
+
+// 监听路由变化 修复点击tags路由变化后左侧menu没有改变焦点状态和收起
+onBeforeRouteUpdate((to, from) => {
+  defaultActive.value = to.path;
+});
 
 // 是否折叠
 const isCollapse = computed(() => {
@@ -70,9 +75,8 @@ const handleSelect = (e) => {
 </script>
 
 <style scoped>
-
 .f-menu {
-  transition: all .2s;
+  transition: all 0.2s;
   top: 64px;
   bottom: 0;
   left: 0;
@@ -81,8 +85,7 @@ const handleSelect = (e) => {
   @apply shadow-md fixed bg-light-50;
 }
 /* 隐藏滚动条 */
-.f-menu::-webkit-scrollbar{
-  width:0
+.f-menu::-webkit-scrollbar {
+  width: 0;
 }
-
 </style>
