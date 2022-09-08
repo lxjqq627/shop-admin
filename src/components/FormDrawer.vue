@@ -1,9 +1,8 @@
 <template>
-  <!-- 抽屉组件 -->
   <el-drawer
-    :size="size"
     v-model="showDrawer"
     :title="title"
+    :size="size"
     :close-on-click-modal="false"
     :destroy-on-close="destroyOnClose"
   >
@@ -12,64 +11,64 @@
         <slot></slot>
       </div>
       <div class="actions">
-        <el-button color="#626aef" type="primary" @click="submit" :loading="loading">{{ confirmText }}</el-button>
-        <el-button color="#626aef" type="default" @click="close">取消</el-button>
+        <el-button
+          type="primary"
+          @click="submit"
+          :loading="loading"
+          >{{ confirmText }}</el-button
+        >
+        <el-button
+          type="default"
+          @click="close"
+          >取消</el-button
+        >
       </div>
     </div>
   </el-drawer>
 </template>
-
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
+
 const showDrawer = ref(false);
 
 const props = defineProps({
   title: String,
   size: {
     type: String,
-    default: '45%'
+    default: '45%',
   },
   destroyOnClose: {
     type: Boolean,
-    default: false
+    default: false,
   },
   confirmText: {
     type: String,
-    default: '提交'
-  }
-})
+    default: '提交',
+  },
+});
 
 const loading = ref(false);
-const showLoading = () => {
-  loading.value = true;
-}
-const hideLoading = () => {
-  loading.value = false;
-}
+const showLoading = () => (loading.value = true);
+const hideLoading = () => (loading.value = false);
 
-const open = () => {
-  showDrawer.value = true;
-};
+// 打开
+const open = () => (showDrawer.value = true);
 
-const close = () => {
-  showDrawer.value = false;
-};
+// 关闭
+const close = () => (showDrawer.value = false);
 
-const emit = defineEmits(['submit'])
 // 提交
-const submit = () => {
-  emit('submit')
-}
+const emit = defineEmits(['submit']);
+const submit = () => emit('submit');
 
 // 向父组件暴露以下方法
 defineExpose({
   open,
   close,
   showLoading,
-  hideLoading
+  hideLoading,
 });
 </script>
-
 <style>
 .formDrawer {
   width: 100%;
@@ -77,6 +76,7 @@ defineExpose({
   position: relative;
   @apply flex flex-col;
 }
+
 .formDrawer .body {
   flex: 1;
   position: absolute;
@@ -86,6 +86,7 @@ defineExpose({
   bottom: 50px;
   overflow-y: auto;
 }
+
 .formDrawer .actions {
   height: 50px;
   @apply mt-auto flex items-center;

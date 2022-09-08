@@ -1,5 +1,5 @@
-import { ref, reactive, computed } from "vue";
-import { toast } from "~/composables/utils";
+import { ref, reactive, computed } from 'vue';
+import { toast } from '~/composables/utils';
 // 列表，分页，搜索，删除，修改状态
 export function useInitTable(opt = {}) {
   let searchForm = null;
@@ -24,7 +24,7 @@ export function useInitTable(opt = {}) {
 
   // 获取数据
   function getData(p = null) {
-    if (typeof p == "number") {
+    if (typeof p == 'number') {
       currentPage.value = p;
     }
 
@@ -32,7 +32,7 @@ export function useInitTable(opt = {}) {
     opt
       .getList(currentPage.value, searchForm)
       .then((res) => {
-        if (opt.onGetListSuccess && typeof opt.onGetListSuccess == "function") {
+        if (opt.onGetListSuccess && typeof opt.onGetListSuccess == 'function') {
           opt.onGetListSuccess(res);
         } else {
           tableData.value = res.list;
@@ -52,7 +52,7 @@ export function useInitTable(opt = {}) {
     opt
       .delete(id)
       .then((res) => {
-        toast("删除成功");
+        toast('删除成功');
         getData();
       })
       .finally(() => {
@@ -66,11 +66,35 @@ export function useInitTable(opt = {}) {
     opt
       .updateStatus(row.id, status)
       .then((res) => {
-        toast("修改状态成功");
+        toast('修改状态成功');
         row.status = status;
       })
       .finally(() => {
         row.statusLoading = false;
+      });
+  };
+
+  // 多选选中ID
+  const multiSelectionIds = ref([]);
+  const handleSelectionChange = (e) => {
+    multiSelectionIds.value = e.map((o) => o.id);
+  };
+  // 批量删除
+  const multipleTableRef = ref(null);
+  const handleMultiDelete = () => {
+    loading.value = true;
+    opt
+      .delete(multiSelectionIds.value)
+      .then((res) => {
+        toast('删除成功');
+        // 清空选中
+        if (multipleTableRef.value) {
+          multipleTableRef.value.clearSelection();
+        }
+        getData();
+      })
+      .finally(() => {
+        loading.value = false;
       });
   };
 
@@ -85,6 +109,9 @@ export function useInitTable(opt = {}) {
     getData,
     handleDelete,
     handleStatusChange,
+    handleSelectionChange,
+    multipleTableRef,
+    handleMultiDelete,
   };
 }
 
@@ -97,7 +124,7 @@ export function useInitForm(opt = {}) {
   const form = reactive({});
   const rules = opt.rules || {};
   const editId = ref(0);
-  const drawerTitle = computed(() => (editId.value ? "修改" : "新增"));
+  const drawerTitle = computed(() => (editId.value ? '修改' : '新增'));
 
   const handleSubmit = () => {
     formRef.value.validate((valid) => {
@@ -105,13 +132,20 @@ export function useInitForm(opt = {}) {
 
       formDrawerRef.value.showLoading();
 
+      let body = {};
+      if (opt.beforeSubmit && typeof opt.beforeSubmit == 'function') {
+        body = opt.beforeSubmit({ ...form });
+      } else {
+        body = form;
+      }
+
       const fun = editId.value
-        ? opt.update(editId.value, form)
-        : opt.create(form);
+        ? opt.update(editId.value, body)
+        : opt.create(body);
 
       fun
         .then((res) => {
-          toast(drawerTitle.value + "成功");
+          toast(drawerTitle.value + '成功');
           // 修改刷新当前页，新增刷新第一页
           opt.getData(editId.value ? false : 1);
           formDrawerRef.value.close();

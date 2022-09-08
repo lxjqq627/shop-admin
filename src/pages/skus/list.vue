@@ -1,9 +1,22 @@
 <template>
   <el-card shadow="never" class="border-0">
     <!-- 新增|刷新 -->
-    <ListHeader @create="handleCreate" @refresh="getData" />
+    <ListHeader
+      layout="create,delete,refresh"
+      @create="handleCreate"
+      @refresh="getData"
+      @delete="handleMultiDelete"
+    />
 
-    <el-table :data="tableData" stripe style="width: 100%" v-loading="loading">
+    <el-table
+      ref="multipleTableRef"
+      @selection-change="handleSelectionChange"
+      :data="tableData"
+      stripe
+      style="width: 100%"
+      v-loading="loading"
+    >
+      <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="name" label="规格名称" />
       <el-table-column prop="default" label="规格值" width="380" />
       <el-table-column prop="order" label="排序" />
@@ -55,7 +68,13 @@
       />
     </div>
 
-    <FormDrawer ref="formDrawerRef" :title="drawerTitle" @submit="handleSubmit">
+    <!-- destroyOnClose 此处添加这个是销毁里面组件TagInput以备组件重新获取数据 -->
+    <FormDrawer
+      destroyOnClose
+      ref="formDrawerRef"
+      :title="drawerTitle"
+      @submit="handleSubmit"
+    >
       <el-form
         :model="form"
         ref="formRef"
@@ -66,7 +85,7 @@
         <el-form-item label="规格名称" prop="name">
           <el-input v-model="form.name" placeholder="规格名称"></el-input>
         </el-form-item>
-        <el-form-item label="配许" prop="order">
+        <el-form-item label="排序" prop="order">
           <el-input-number v-model="form.order" :min="0" :max="1000">
           </el-input-number>
         </el-form-item>
@@ -79,7 +98,7 @@
           </el-switch>
         </el-form-item>
         <el-form-item label="规格值" prop="default">
-          <el-input v-model="form.default" placeholder="规格值"></el-input>
+          <TagInput v-model="form.default"></TagInput>
         </el-form-item>
       </el-form>
     </FormDrawer>
@@ -89,6 +108,8 @@
 import { ref } from "vue";
 import ListHeader from "~/components/ListHeader.vue";
 import FormDrawer from "~/components/FormDrawer.vue";
+import TagInput from "~/components/TagInput.vue";
+
 import {
   getSkusList,
   createSkus,
@@ -109,6 +130,9 @@ const {
   getData,
   handleDelete,
   handleStatusChange,
+  handleSelectionChange,
+  handleMultiDelete,
+  multiSelectionIds,
 } = useInitTable({
   getList: getSkusList,
   delete: deleteSkus,
