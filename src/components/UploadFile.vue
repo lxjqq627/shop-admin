@@ -4,7 +4,7 @@
     :action="uploadImageAction"
     multiple
     :headers="{
-      token
+        token
     }"
     name="img"
     :data="data"
@@ -22,29 +22,27 @@
     </template>
   </el-upload>
 </template>
-
 <script setup>
-import { uploadImageAction } from '~/api/image'
-import { getToken } from '~/composables/auth'
-import { toast } from '~/composables/utils';
-
+import { uploadImageAction } from "~/api/image"
+import { getToken } from "~/composables/auth"
+import { toast } from "~/composables/util"
 const token = getToken()
 
 defineProps({
-  data: Object,
+    data:Object,
 })
 
-const emit = defineEmits(['success'])
+const emit = defineEmits(["success"])
 
-const uploadSuccess = (response, uploadFile, uploadFiles) => {
-  emit('success', {
-    response, uploadFile, uploadFiles
-  })
+const uploadSuccess = (response, uploadFile, uploadFiles)=>{
+    console.log(response);
+    emit("success",{
+        response, uploadFile, uploadFiles
+    })
 }
-const uploadError = (error, uploadFile, uploadFiles) => {
-  let msg = JSON.parse(error.message).msg || '上传失败';
-  toast(msg, 'error')
+
+const uploadError = (error, uploadFile, uploadFiles)=>{
+    let msg = JSON.parse(error.message).msg || "上传失败"
+    toast(msg,"error")
 }
 </script>
-
-<style></style>
